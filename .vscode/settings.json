@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.embeddedhtml": "html",
+        "*.ino": "arduino",
+        "*.db": "sqlite",
+        "*.html": "php",
+        "*.php": "php",
+        "ncurses.h": "c",
+        "unistd.h": "c"
+    }
+}
