@@ -10,28 +10,31 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define CONN 0         //Gate종류로 분류되지만 전선 연결 모드를 뜻함
+#define CONN 0
 #define NOT 1
 #define AND 2
 #define OR 3
 #define XOR 4
-#define CONTROLMODE 99 //Gate종류로 분류되지만 input 제어를 위해 선언
+#define CONTROLMODE 99
 
-#define GATE_IN_X1 0   //Gate의 입출력 위치
+#define GATE_IN_X1 0
 #define GATE_IN_Y1 1
 #define GATE_IN_X2 0
 #define GATE_IN_Y2 3
 #define GATE_OUT_X 11
 #define GATE_OUT_Y 2
 
-#define NOT_IN_X 0     //NOT Gate의 입출력 위치
+#define NOT_IN_X 0
 #define NOT_IN_Y 1
 #define NOT_OUT_X 5
 #define NOT_OUT_Y 1
 
+#define GATE_END_X 11
+#define GATE_END_Y 3
 
+typedef struct gate gate;
 
-typedef struct{       //Gate 구조체
+struct gate {
     int idx;
     int x;
     int y;
@@ -46,54 +49,55 @@ typedef struct{       //Gate 구조체
     int next_count;
     int in_pin_status[2];
     int out_pin_status;
-}gate;
+};
 
-gate* gates[30];    //Gate들을 저장하는 배열
+gate* gates[30];
 
-int gateCount = 0; //Gate의 개수
-int gateSelected1 = -1; //선택된 Gate의 인덱스( -1은 선택되지 않음을 뜻함 )
-int gateSelected2 = -1; //선택된 Gate의 인덱스
+int gateCount = 0;
+int gateSelected1 = -1;
+int gateSelected2 = -1;
 
-int input_count = 0; //input Pin의 개수
+int input_count = 0;
 
-char* gateType[5] = { "PIN", "NOT", "AND", "OR", "XOR" }; //Gate의 종류
-char* pinType[2] = { "IN", "OUT" }; //Pin의 종류
+char* gateType[5] = { "PIN", "NOT", "AND", "OR", "XOR" };
+char* pinType[2] = { "IN", "OUT" };
 
-int x = 5, y = 5; //커서의 위치
+int x = 5, y = 5;
 
-void initVar() { // gates 배열에 동적할당
+void initVar() {
     for (int i = 0; i < 30; i++) {
         gates[i] = (gate*)malloc(sizeof(gate));
     }
 }
 
 void clearScreen() {
-#ifdef _WIN32 || _WIN64 //윈도우의 경우
+#ifdef _WIN32 || _WIN64
     system("cls");
-#else //리눅스의 경우
+#else
     system("clear");
 #endif
 }
 
 void moveCursorTo(int x, int y) {
-#ifdef _WIN32 || _WIN64 //윈도우의 경우
+#ifdef _WIN32 || _WIN64
     COORD coord;
     coord.X = x - 1;
     coord.Y = y - 1;
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord); //windows.h를 이용해 커서를 이동
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 #else
-    printf("\033[%d;%df", y, x); //직접 커서를 이동
-    fflush(stdout);              //버퍼를 비움
+    printf("\033[%d;%df", y, x);
+    fflush(stdout);
 #endif
 }
 
+
 void drawAndGate(int x, int y, int status) {
-    moveCursorTo(x, y);             //커서를 이동
+    moveCursorTo(x, y);
     printf("   _______ ");
     moveCursorTo(x, y + 1);
     printf("─ |       \\");
     moveCursorTo(x, y + 2);
-    printf("  |  AND  │─%d", status); //AND Gate의 출력 상태를 표시
+    printf("  |  AND  │─%d", status);
     moveCursorTo(x, y + 3);
     printf("─ |_______/  ");
 }
@@ -225,7 +229,7 @@ void drawWire() {
 }
 
 void printInit(int mode) {
-    printf("Enter 0 : %s\t1 : AND\t2 : OR\t3 : XOR\t4 : NOT\t\t\t%d, %d\t", (mode != CONTROLMODE ? "CONNECT MODE" : "CONTROL MODE"), x, y);
+    printf("Enter 0 : %s\t1 : AND\t2 : OR\t3 : XOR\t4 : NOT\t9 : CONTROLMODE\t e : select\t\t%d, %d\t", (mode != CONTROLMODE ? "CONNECT MODE" : "CONTROL MODE"), x, y);
     int i;
     //printf("Selected 1 : %d\tSelected 2 : %d", gateSelected1, gateSelected2);
     if (gateSelected1 == -1) {
@@ -397,14 +401,17 @@ void selectGate() {
     }
 }
 
+
 void simGates() {
     int i, j, k;
     for (i = 0; i < gateCount; i++) {
         if (gates[i]->type == NOT) {
             gates[i]->out_pin_status = !gates[i]->in_pin_status[0];
         }
-        if (gates[i]->type == AND) {
+        if (gates[i]->type == AND) { //1,2,3Pin -> AND 1input, 4Pin -> AND 2input -> Error
+
             gates[i]->out_pin_status = gates[i]->in_pin_status[0] && gates[i]->in_pin_status[1];
+
         }
         if (gates[i]->type == OR) {
             gates[i]->out_pin_status = gates[i]->in_pin_status[0] || gates[i]->in_pin_status[1];
@@ -421,7 +428,7 @@ void simGates() {
                     if (gates[i]->next[j]->prev[0][k] == gates[i]) {
                         gates[i]->next[j]->in_pin_status[0] = gates[i]->out_pin_status || gates[i]->next[j]->in_pin_status[0];
                     }
-                    else if(gates[i]->next[j]->prev[1][k] == gates[i]) {
+                    else if (gates[i]->next[j]->prev[1][k] == gates[i]) {
                         gates[i]->next[j]->in_pin_status[1] = gates[i]->out_pin_status || gates[i]->next[j]->in_pin_status[1];
                     }
                 }
@@ -440,6 +447,7 @@ void switchPinOut() {
     gateSelected1 = -1;
     gateSelected2 = -1;
 }
+
 
 void placeGate(int gateType) {
     while (1) {
@@ -514,7 +522,8 @@ void placeGate(int gateType) {
 
 
 
-int main(){
+int main()
+{
     printf("Pin Number(1~9) : ");
     scanf("%d", &input_count);
     initVar();
