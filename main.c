@@ -408,10 +408,8 @@ void simGates() {
         if (gates[i]->type == NOT) {
             gates[i]->out_pin_status = !gates[i]->in_pin_status[0];
         }
-        if (gates[i]->type == AND) { //1,2,3Pin -> AND 1input, 4Pin -> AND 2input -> Error
-
+        if (gates[i]->type == AND) {
             gates[i]->out_pin_status = gates[i]->in_pin_status[0] && gates[i]->in_pin_status[1];
-
         }
         if (gates[i]->type == OR) {
             gates[i]->out_pin_status = gates[i]->in_pin_status[0] || gates[i]->in_pin_status[1];
