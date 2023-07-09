@@ -3,7 +3,7 @@
 #else
 #include <ncurses.h>
 #include <unistd.h>
-#include "io.h"
+#include "io.h" // for _getch() and _kbhit() in macOS and Linux (include termios.h, unistd.h, fcntl.h)
 #endif
 
 #include <stdio.h>
@@ -336,6 +336,7 @@ void setPin() {
         gates[gateCount]->next_count = 0;
         memset(gates[gateCount]->prev, 0, sizeof(gates[gateCount]->prev));
         memset(gates[gateCount]->next, 0, sizeof(gates[gateCount]->next));
+        memset(gates[gateCount]->in_pin_status, 0, sizeof(gates[gateCount]->in_pin_status));
         gates[gateCount]->out_pin_status = 0;
         gateCount += 1;
     }
@@ -426,7 +427,9 @@ void simGates() {
                     if (gates[i]->next[j]->prev[0][k] == gates[i]) {
                         gates[i]->next[j]->in_pin_status[0] = gates[i]->out_pin_status || gates[i]->next[j]->in_pin_status[0];
                     }
-                    else if (gates[i]->next[j]->prev[1][k] == gates[i]) {
+                }
+                for(k = 0; k < gates[i]->next[j]->prev_count[1]; k++){
+                    if (gates[i]->next[j]->prev[1][k] == gates[i]) {
                         gates[i]->next[j]->in_pin_status[1] = gates[i]->out_pin_status || gates[i]->next[j]->in_pin_status[1];
                     }
                 }
