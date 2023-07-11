@@ -229,7 +229,7 @@ void drawWire() {
 }
 
 void printInit(int mode) {
-    printf("Enter 0 : %s\t1 : AND\t2 : OR\t3 : XOR\t4 : NOT\t9 : CONTROLMODE\t e : select\t\t%d, %d\t", (mode != CONTROLMODE ? "CONNECT MODE" : "CONTROL MODE"), x, y);
+    printf("Enter %s\t1 : AND\t2 : OR\t3 : XOR\t4 : NOT\t e : select\tMODE : %s\t\t%d, %d\t",(mode == CONTROLMODE ? "0 : CONNECT MODE" : "9 : CONTROL MODE"),(mode != CONTROLMODE ? "CONNECT MODE" : "CONTROL MODE"),x,y);
     int i;
     //printf("Selected 1 : %d\tSelected 2 : %d", gateSelected1, gateSelected2);
     if (gateSelected1 == -1) {
