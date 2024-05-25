@@ -295,7 +295,7 @@ void printInit(int mode) {
     drawWire();
 }
 
-void setGate(x, y, type) {
+void setGate(int x, int y, int type) {
     gates[gateCount]->x = x;
     gates[gateCount]->y = y;
     gates[gateCount]->idx = gateCount;
